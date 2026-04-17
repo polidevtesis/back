@@ -1,5 +1,6 @@
 package com.polidevtesis.inventory.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.polidevtesis.inventory.entity.Sale;
 import lombok.Data;
 
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 public class SaleResponse {
 
     private Long id;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "America/Bogota")
     private LocalDateTime saleDate;
     private BigDecimal totalAmount;
     private String notes;
