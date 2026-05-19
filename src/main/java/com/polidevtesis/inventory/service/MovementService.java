@@ -34,9 +34,9 @@ public class MovementService {
     }
 
     public MovementResponse findById(Long id) {
-        return MovementResponse.from(movementRepository.findById(id)
+        return MovementResponse.from(movementRepository.findByIdWithProduct(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Movement not found with id: " + id, "MOVEMENT_NOT_FOUND")));
+                        "Movement not found with id: " + id, "MOVEMENT_NOT_FOUND")));
     }
 
     public List<MovementResponse> findByProduct(Long productId) {
@@ -49,16 +49,17 @@ public class MovementService {
     public MovementResponse register(MovementRequest request) {
         if (request.getType() == MovementType.OUTPUT) {
             throw new IllegalArgumentException(
-                "OUTPUT movements are created automatically by sales. Use INPUT or ADJUSTMENT.");
+                    "OUTPUT movements are created automatically by sales. Use INPUT or ADJUSTMENT.");
         }
 
         Product product = productRepository.findByIdAndDeletedAtIsNull(request.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Product not found with id: " + request.getProductId(), "PRODUCT_NOT_FOUND"));
+                        "Product not found with id: " + request.getProductId(), "PRODUCT_NOT_FOUND"));
 
         int delta = request.getType() == MovementType.INPUT
                 ? request.getQuantity()
-                : request.getQuantity(); // ADJUSTMENT can be positive or negative if needed — keep positive, caller decides type
+                : request.getQuantity(); // ADJUSTMENT can be positive or negative if needed — keep positive, caller
+                                         // decides type
 
         product.setStock(product.getStock() + delta);
         productRepository.save(product);
@@ -76,7 +77,8 @@ public class MovementService {
     }
 
     /**
-     * Internal method used by SaleService to create OUTPUT movements when a sale is registered.
+     * Internal method used by SaleService to create OUTPUT movements when a sale is
+     * registered.
      * Not exposed directly through REST.
      */
     @Transactional

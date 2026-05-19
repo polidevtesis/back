@@ -10,25 +10,41 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface InventoryMovementRepository extends JpaRepository<InventoryMovement, Long> {
 
-    @Query("""
-        SELECT m FROM InventoryMovement m
-        WHERE (:productId IS NULL OR m.product.id = :productId)
-          AND (:type IS NULL OR m.type = :type)
-          AND (:from IS NULL OR m.movedAt >= :from)
-          AND (:to IS NULL OR m.movedAt <= :to)
-        ORDER BY m.movedAt DESC
-        """)
+    @Query(
+        value = """
+            SELECT m FROM InventoryMovement m
+            JOIN FETCH m.product
+            WHERE (:productId IS NULL OR m.product.id = :productId)
+              AND (:type IS NULL OR m.type = :type)
+              AND (:from IS NULL OR m.movedAt >= :from)
+              AND (:to IS NULL OR m.movedAt <= :to)
+            """,
+        countQuery = """
+            SELECT COUNT(m) FROM InventoryMovement m
+            WHERE (:productId IS NULL OR m.product.id = :productId)
+              AND (:type IS NULL OR m.type = :type)
+              AND (:from IS NULL OR m.movedAt >= :from)
+              AND (:to IS NULL OR m.movedAt <= :to)
+            """
+    )
     Page<InventoryMovement> search(
-        @Param("productId") Long productId,
-        @Param("type") MovementType type,
-        @Param("from") LocalDateTime from,
-        @Param("to") LocalDateTime to,
-        Pageable pageable
-    );
+            @Param("productId") Long productId,
+            @Param("type") MovementType type,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable);
 
     // Stock history for a single product ordered chronologically
     List<InventoryMovement> findByProductIdOrderByMovedAtAsc(Long productId);
+
+    @Query("""
+                select m from InventoryMovement m
+                join fetch m.product
+                where m.id = :id
+            """)
+    Optional<InventoryMovement> findByIdWithProduct(@Param("id") Long id);
 }
