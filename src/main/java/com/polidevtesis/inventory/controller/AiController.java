@@ -25,15 +25,15 @@ public class AiController {
      */
     @PostMapping("/order-recommendation")
     public ResponseEntity<ApiResponse<OrderRecommendationResponse>> recommend(
-            @RequestHeader("X-Claude-Api-Key") String claudeApiKey,
+            @RequestHeader("X-OpenAI-Api-Key") String openAiApiKey,
             @Valid @RequestBody OrderRecommendationRequest request) {
 
-        if (claudeApiKey == null || claudeApiKey.isBlank()) {
+        if (openAiApiKey == null || openAiApiKey.isBlank()) {
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("X-Claude-Api-Key header is required", "MISSING_API_KEY"));
+                    .body(ApiResponse.error("X-OpenAI-Api-Key header is required", "MISSING_API_KEY"));
         }
 
-        OrderRecommendationResponse result = claudeOrderService.recommend(claudeApiKey, request);
+        OrderRecommendationResponse result = claudeOrderService.recommend(openAiApiKey, request);
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
 }
